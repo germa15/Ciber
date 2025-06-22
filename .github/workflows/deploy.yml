@@ -19,33 +19,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # Si tu tema tiene submódulos (Chirpy los usa para algunos assets),
-          # inicializa los submódulos de forma recursiva.
+          # Chirpy usa submódulos para algunos assets, es crucial inicializarlos.
           submodules: true
           # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
-                           # o problemas con repositorios de submodulos.
-                           # Si da problemas, descomenta esta línea.
+                            # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2' # Versión de Ruby compatible con Jekyll 4.x y Chirpy 7.x
-          bundler-cache: true # Caching de las gemas para builds más rápidos
-
-      - name: Install Dependencies
-        # Esto instalará las gemas listadas en tu Gemfile (jekyll-feed, jekyll-seo-tag)
-        # y el entorno base de Jekyll necesario para el remote_theme.
-        run: bundle install --jobs 4 --retry 3
+          bundler-cache: true # Caching de las gemas para builds más rápidos (instala desde Gemfile.lock o Gemfile)
 
       - name: Build Jekyll Site
         # JEKYLL_ENV=production optimiza la salida.
         # remote_theme en _config.yml se encargará de descargar y usar Chirpy.
+        # Asegúrate que tu _config.yml tenga: remote_theme: cotes2020/jekyll-theme-chirpy@v7.2.3
+        # o solo remote_theme: cotes2020/jekyll-theme-chirpy
         run: JEKYLL_ENV=production bundle exec jekyll build --verbose
-        env:
-          # Estas variables de entorno sobreescriben _config.yml.
-          # SOLO descomenta si necesitas ajustar baseurl o url en el workflow.
-          # JEKYLL_BASEURL: '/Ciber'
-          # JEKYLL_URL: 'https://germa15.github.io'
 
       - name: Upload artifact for GitHub Pages
         # Sube la carpeta _site generada por Jekyll para el despliegue.
