@@ -31,10 +31,14 @@ jobs:
           ruby-version: '3.2' # Versión de Ruby compatible con Jekyll 4.x y Chirpy 7.x
           bundler-cache: true # Caching de las gemas para builds más rápidos (instala desde Gemfile.lock o Gemfile)
 
-      - name: Install Dependencies # <--- ¡ESTE PASO FALTABA O NO ESTABA BIEN!
+      - name: Install Dependencies #
         # Instala las gemas especificadas en tu Gemfile, incluyendo Jekyll y el tema Chirpy.
         # `bundler-cache: true` en el paso anterior optimiza esto.
         run: bundle install
+
+      - name: Add Bundler to PATH #
+        # Asegura que el directorio de binarios de Bundler esté en la PATH del entorno.
+        run: echo "BUNDLE_PATH=$(bundle config get path | grep -oP '(?<=: ).*')" >> $GITHUB_ENV && echo "$BUNDLE_PATH/bin" >> $GITHUB_PATH
 
       - name: Build Jekyll Site
         # JEKYLL_ENV=production optimiza la salida.
