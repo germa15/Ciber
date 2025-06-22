@@ -6,7 +6,7 @@ gem "jekyll", "~> 4.3"
 group :jekyll_plugins do
   gem "jekyll-feed"
   gem "jekyll-seo-tag"
-  gem "jekyll-remote-theme", "~> 0.4" 
+  gem "jekyll-theme-chirpy", "~> 7.2" 
 end
 
 # Se mantienen las dependencias específicas de plataforma (aunque GitHub Actions usa Linux)
