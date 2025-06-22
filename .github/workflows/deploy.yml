@@ -1,65 +1,90 @@
+# Nombre del flujo de trabajo que aparecerá en la pestaña 'Actions' de GitHub.
 name: Deploy Jekyll Chirpy Blog to GitHub Pages
 
+# Define cuándo se ejecutará este flujo de trabajo.
 on:
+  # Se ejecuta cuando hay un push a la rama 'main'.
   push:
     branches:
-      - main # Asegúrate que esta sea tu rama principal (es la que usas)
-  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
+      - main # Asegúrate que esta sea tu rama principal (ej. 'main' o 'master').
+  # Permite ejecutar el flujo de trabajo manualmente desde la interfaz de GitHub.
+  workflow_dispatch:
 
+# Define los permisos que necesita este flujo de trabajo.
+# 'contents: read' para leer el repositorio.
+# 'pages: write' para desplegar en GitHub Pages.
+# 'id-token: write' necesario para la autenticación en GitHub Pages.
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Define los trabajos (jobs) que se ejecutarán en este flujo de trabajo.
 jobs:
-  # Job para construir el sitio Jekyll
+  # Primer trabajo: 'build' - Encargado de construir el sitio Jekyll.
   build:
+    # Se ejecuta en el último sistema operativo Ubuntu disponible.
     runs-on: ubuntu-latest
+    # Define los pasos que este trabajo seguirá.
     steps:
-      - name: Checkout Code
+      - name: Checkout Code # Paso para clonar el código de tu repositorio.
         uses: actions/checkout@v4
         with:
-          # Si tu tema tiene submódulos (Chirpy los usa para algunos assets),
-          # inicializa los submódulos de forma recursiva.
+          # Es crucial para temas como Chirpy que usan submódulos (recursos externos del tema).
           submodules: true
-          # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
-                            # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
+          # fetch-depth: 0 # Opcional: Descomentar si tienes un historial de Git muy largo
+                            # o problemas específicos con los submódulos.
 
-      - name: Set up Ruby
+      - name: Set up Ruby # Configura el entorno Ruby necesario para Jekyll.
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2' # Versión de Ruby compatible con Jekyll 4.x y Chirpy 7.x
-          bundler-cache: true # Caching de las gemas para builds más rápidos (instala desde Gemfile.lock o Gemfile)
+          # Especifica la versión de Ruby. Jekyll 4.x y Chirpy 7.x son compatibles con Ruby 3.2.
+          ruby-version: '3.2'
+          # Optimiza la instalación de gemas y configura la PATH de Bundler.
+          bundler-cache: true
 
-      - name: Install Dependencies #
-        # Instala las gemas especificadas en tu Gemfile, incluyendo Jekyll y el tema Chirpy.
-        # `bundler-cache: true` en el paso anterior optimiza esto.
+      - name: Install Dependencies # Instala las gemas listadas en tu Gemfile.
+        # Esto incluye Jekyll y el tema Chirpy, así como cualquier plugin adicional.
         run: bundle install
 
-      - name: Add Bundler to PATH #
-        # Asegura que el directorio de binarios de Bundler esté en la PATH del entorno.
-        run: echo "BUNDLE_PATH=$(bundle config get path | grep -oP '(?<=: ).*')" >> $GITHUB_ENV && echo "$BUNDLE_PATH/bin" >> $GITHUB_PATH
+      - name: Add Bundler to PATH # <-- ¡PASO CORREGIDO Y CLAVE PARA 'jekyll command not found'!
+        # Asegura que el directorio donde Bundler instala los ejecutables (como 'jekyll')
+        # esté correctamente en la variable de entorno PATH del sistema.
+        run: | # Usamos el operador literal para ejecutar múltiples comandos en Bash.
+          echo "Añadiendo ejecutables de Bundler a la PATH del entorno..."
+          # Obtiene la ruta base donde Bundler instala las gemas, y añade '/bin'.
+          BUNDLE_BIN_PATH=$(bundle exec gem environment gemdir)/bin
+          # Añade esta ruta a la variable de entorno GITHUB_PATH para que los comandos se encuentren.
+          echo "$BUNDLE_BIN_PATH" >> $GITHUB_PATH
+          # Opcional para depuración: Muestra la PATH final.
+          echo "PATH después de la adición: $PATH"
+        shell: bash # Especifica explícitamente el shell Bash para ejecutar los comandos.
 
-      - name: Build Jekyll Site
-        # JEKYLL_ENV=production optimiza la salida.
-        # Tu _config.yml usa 'theme: jekyll-theme-chirpy', que se instalará como gema.
+      - name: Build Jekyll Site # Construye el sitio Jekyll (genera la carpeta '_site').
+        # JEKYLL_ENV=production optimiza la salida para un entorno de producción.
+        # 'bundle exec jekyll build --verbose' ejecuta la construcción de Jekyll.
+        # Tu _config.yml debe usar 'theme: jekyll-theme-chirpy'.
         run: JEKYLL_ENV=production bundle exec jekyll build --verbose
 
-      - name: Upload artifact for GitHub Pages
-        # Sube la carpeta _site generada por Jekyll para el despliegue.
+      - name: Upload artifact for GitHub Pages # Sube los archivos construidos para el despliegue.
+        # Los archivos HTML/CSS/JS finales se encuentran en la carpeta '_site'.
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site # Directorio donde Jekyll construye el sitio
+          path: ./_site # Directorio donde Jekyll construye el sitio.
 
-  # Job para desplegar el sitio en GitHub Pages
+  # Segundo trabajo: 'deploy' - Encargado de publicar el sitio en GitHub Pages.
   deploy:
+    # Define el entorno de despliegue en GitHub Pages.
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }} # URL final del sitio desplegado.
+    # Se ejecuta en el último sistema operativo Ubuntu disponible.
     runs-on: ubuntu-latest
-    needs: build # Este job depende del job 'build' para asegurar que el sitio se construya primero
+    # Este trabajo depende de que el trabajo 'build' haya finalizado con éxito.
+    needs: build
 
+    # Pasos para el despliegue.
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages # Utiliza la acción de despliegue de GitHub Pages.
         id: deployment
         uses: actions/deploy-pages@v4
