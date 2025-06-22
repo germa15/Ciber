@@ -14,7 +14,7 @@ permissions:
 jobs:
   # Job para construir el sitio Jekyll
   build:
-    runs-on: ubuntu-22.04 # <--- ¡CAMBIO AQUÍ! Usa Ubuntu 22.04 para evitar posibles problemas con 24.04
+    runs-on: ubuntu-22.04 # Usamos Ubuntu 22.04 para evitar posibles problemas con 24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -25,36 +25,40 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true # Esto se encarga de instalar las gemas y configurar la PATH.
+          bundler-cache: true # ¡IMPORTANTE! Asegúrate de que esto esté activo y en minúsculas
 
       # --- Pasos de depuración (DESCOMENTA PARA USAR) ---
       # Si el problema persiste, descomenta estos pasos y revisa los logs
-      - name: Debug: Print PATH and current directory
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "PATH: $PATH"
+      # - name: Debug: Print PATH and current directory
+      #   run: |
+      #     echo "Current directory: $(pwd)"
+      #     echo "PATH: $PATH"
 
-      - name: Debug: List contents of Bundler's gem home and check Jekyll
-        run: |
-          bundle config --local path || true
-          bundle env
-          gem env
-          # Verificamos si jekyll está en el bin de vendor/bundle
-          if [ -d "./vendor/bundle/ruby/3.2.0/bin" ]; then # Ajusta la versión de Ruby si es diferente (e.g., 3.2.0)
-            echo "Listing contents of ./vendor/bundle/ruby/3.2.0/bin:"
-            ls -l ./vendor/bundle/ruby/3.2.0/bin
-          else
-            echo "./vendor/bundle/ruby/3.2.0/bin directory not found or empty."
-          fi
-          bundle exec gem which jekyll || echo "Jekyll not found by bundle exec gem which"
-          find . -name "jekyll"
+      # - name: Debug: List contents of Bundler's gem home and check Jekyll
+      #   run: |
+      #     bundle config --local path || true
+      #     bundle env
+      #     gem env
+      #     # Verificamos si jekyll está en el bin de vendor/bundle
+      #     if [ -d "./vendor/bundle/ruby/3.2.0/bin" ]; then # Ajusta la versión de Ruby si es diferente (e.g., 3.2.0)
+      #       echo "Listing contents of ./vendor/bundle/ruby/3.2.0/bin:"
+      #       ls -l ./vendor/bundle/ruby/3.2.0/bin
+      #     else
+      #       echo "./vendor/bundle/ruby/3.2.0/bin directory not found or empty."
+      #     fi
+      #     bundle exec gem which jekyll || echo "Jekyll not found by bundle exec gem which"
+      #     find . -name "jekyll"
 
       # - name: Debug: Check Gemfile.lock integrity
       #   run: |
       #     bundle check || echo "Bundle check failed, dependencies might be missing or mismatched."
       # --- Fin de Pasos de depuración ---
 
-      - name: Build Jekyll Site # <--- ¡AJUSTE CLAVE AQUÍ!
+      # ELIMINA O COMENTA ESTE PASO COMPLETAMENTE para evitar conflictos
+      # - name: Install Dependencies to Vendor Bundle
+      #   run: bundle install --path vendor/bundle
+
+      - name: Build Jekyll Site
         run: |
           # Aseguramos que la ruta de los binarios de Bundler esté en la PATH
           # antes de ejecutar el comando de Jekyll.
@@ -73,7 +77,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-22.04 # <--- ¡CAMBIO AQUÍ!
+    runs-on: ubuntu-22.04 # Usamos Ubuntu 22.04 aquí también
     needs: build
 
     steps:
