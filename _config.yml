@@ -24,12 +24,12 @@ description: >- # this means to ignore newlines until "baseurl:"
   Blog de cibersegurdad basado en conocimientos y experiencias propias,
   de un fanático de la seguridad informática para el que quiera leer.
 baseurl: "/Ciber" # the subpath of your site, e.g. /blog
-url: "url: "https://germa15.github.io"" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://germa15.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: kzu1500
 github_username:  germa15
 
 # Build settings
-theme: minima
+remote_theme: cotes2020/jekyll-theme-chirpy@v7.2.3
 plugins:
   - jekyll-feed
 
