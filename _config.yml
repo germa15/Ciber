@@ -29,7 +29,7 @@ twitter_username: kzu1500
 github_username:  germa15
 
 # Build settings
-remote_theme: cotes2020/jekyll-theme-chirpy@v7.2.3
+remote_theme: cotes2020/jekyll-theme-chirpy@gh-pages
 plugins:
   - jekyll-feed
 
