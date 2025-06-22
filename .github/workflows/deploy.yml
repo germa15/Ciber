@@ -1,90 +1,66 @@
-# Nombre del flujo de trabajo que aparecerá en la pestaña 'Actions' de GitHub.
 name: Deploy Jekyll Chirpy Blog to GitHub Pages
 
-# Define cuándo se ejecutará este flujo de trabajo.
 on:
-  # Se ejecuta cuando hay un push a la rama 'main'.
   push:
     branches:
-      - main # Asegúrate que esta sea tu rama principal (ej. 'main' o 'master').
-  # Permite ejecutar el flujo de trabajo manualmente desde la interfaz de GitHub.
-  workflow_dispatch:
+      - main # Asegúrate que esta sea tu rama principal (es la que usas)
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
 
-# Define los permisos que necesita este flujo de trabajo.
-# 'contents: read' para leer el repositorio.
-# 'pages: write' para desplegar en GitHub Pages.
-# 'id-token: write' necesario para la autenticación en GitHub Pages.
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Define los trabajos (jobs) que se ejecutarán en este flujo de trabajo.
 jobs:
-  # Primer trabajo: 'build' - Encargado de construir el sitio Jekyll.
+  # Job para construir el sitio Jekyll
   build:
-    # Se ejecuta en el último sistema operativo Ubuntu disponible.
     runs-on: ubuntu-latest
-    # Define los pasos que este trabajo seguirá.
     steps:
-      - name: Checkout Code # Paso para clonar el código de tu repositorio.
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # Es crucial para temas como Chirpy que usan submódulos (recursos externos del tema).
           submodules: true
-          # fetch-depth: 0 # Opcional: Descomentar si tienes un historial de Git muy largo
-                            # o problemas específicos con los submódulos.
+          # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
+                            # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
 
-      - name: Set up Ruby # Configura el entorno Ruby necesario para Jekyll.
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          # Especifica la versión de Ruby. Jekyll 4.x y Chirpy 7.x son compatibles con Ruby 3.2.
           ruby-version: '3.2'
-          # Optimiza la instalación de gemas y configura la PATH de Bundler.
-          bundler-cache: true
+          # ¡IMPORTANTE! bundler-cache: true se desactiva aquí para que 'bundle install --path vendor/bundle' funcione sin conflicto.
+          # bundler-cache: true
 
-      - name: Install Dependencies # Instala las gemas listadas en tu Gemfile.
-        # Esto incluye Jekyll y el tema Chirpy, así como cualquier plugin adicional.
-        run: bundle install
+      # Eliminamos el paso 'Install Bundler' si lo tenías separado
 
-      - name: Add Bundler to PATH # <-- ¡PASO CORREGIDO Y CLAVE PARA 'jekyll command not found'!
-        # Asegura que el directorio donde Bundler instala los ejecutables (como 'jekyll')
-        # esté correctamente en la variable de entorno PATH del sistema.
-        run: | # Usamos el operador literal para ejecutar múltiples comandos en Bash.
-          echo "Añadiendo ejecutables de Bundler a la PATH del entorno..."
-          # Obtiene la ruta base donde Bundler instala las gemas, y añade '/bin'.
-          BUNDLE_BIN_PATH=$(bundle exec gem environment gemdir)/bin
-          # Añade esta ruta a la variable de entorno GITHUB_PATH para que los comandos se encuentren.
-          echo "$BUNDLE_BIN_PATH" >> $GITHUB_PATH
-          # Opcional para depuración: Muestra la PATH final.
-          echo "PATH después de la adición: $PATH"
-        shell: bash # Especifica explícitamente el shell Bash para ejecutar los comandos.
+      - name: Install Dependencies to Vendor Bundle # <--- ¡NUEVO PASO DE INSTALACIÓN CLAVE!
+        # Instala todas las gemas (incluyendo Jekyll y Chirpy) en la carpeta local 'vendor/bundle'.
+        # Esto nos da control directo sobre su ubicación.
+        run: bundle install --path vendor/bundle
 
-      - name: Build Jekyll Site # Construye el sitio Jekyll (genera la carpeta '_site').
-        # JEKYLL_ENV=production optimiza la salida para un entorno de producción.
-        # 'bundle exec jekyll build --verbose' ejecuta la construcción de Jekyll.
-        # Tu _config.yml debe usar 'theme: jekyll-theme-chirpy'.
-        run: JEKYLL_ENV=production bundle exec jekyll build --verbose
+      # Eliminamos el paso 'Add Bundler to PATH' que habíamos probado antes.
 
-      - name: Upload artifact for GitHub Pages # Sube los archivos construidos para el despliegue.
-        # Los archivos HTML/CSS/JS finales se encuentran en la carpeta '_site'.
+      - name: Build Jekyll Site # <--- ¡PASO DE CONSTRUCCIÓN CORREGIDO!
+        # Primero, añade el directorio de binarios de 'vendor/bundle' a la PATH.
+        # Luego, ejecuta Jekyll directamente desde esa PATH.
+        run: |
+          export PATH=$(pwd)/vendor/bundle/bin:$PATH
+          JEKYLL_ENV=production jekyll build --verbose
+        shell: bash # Asegura que se usa Bash para el comando 'export PATH'
+
+      - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site # Directorio donde Jekyll construye el sitio.
+          path: ./_site
 
-  # Segundo trabajo: 'deploy' - Encargado de publicar el sitio en GitHub Pages.
+  # Job para desplegar el sitio en GitHub Pages
   deploy:
-    # Define el entorno de despliegue en GitHub Pages.
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }} # URL final del sitio desplegado.
-    # Se ejecuta en el último sistema operativo Ubuntu disponible.
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    # Este trabajo depende de que el trabajo 'build' haya finalizado con éxito.
-    needs: build
+    needs: build # Este job depende del job 'build' para asegurar que el sitio se construya primero
 
-    # Pasos para el despliegue.
     steps:
-      - name: Deploy to GitHub Pages # Utiliza la acción de despliegue de GitHub Pages.
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
