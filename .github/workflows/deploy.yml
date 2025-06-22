@@ -27,21 +27,16 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          Bundler-cache: true
-          # Mantén esta línea comentada si usas 'bundle install --path vendor/bundle' explícitamente
-          # bundler-cache: true
+          bundler-cache: true # ¡IMPORTANTE! Activamos la caché de Bundler
 
-      - name: Install Dependencies to Vendor Bundle
-        # Instala todas las gemas (incluyendo Jekyll y Chirpy) en la carpeta local 'vendor/bundle'.
-        # Esto nos da control directo sobre su ubicación.
-        run: bundle install --path vendor/bundle
+      # Elimina o comenta este paso para evitar conflictos
+      # - name: Install Dependencies to Vendor Bundle
+      #   run: bundle install --path vendor/bundle
 
-      - name: Build Jekyll Site # <--- ¡PASO DE CONSTRUCCIÓN CORREGIDO!
-        # Usa 'bundle exec' para asegurar que Jekyll se ejecuta en el contexto de Bundler,
-        # lo que resuelve automáticamente los problemas de PATH.
+      - name: Build Jekyll Site
         run: |
           JEKYLL_ENV=production bundle exec jekyll build --verbose
-        shell: bash # Asegura que se usa Bash para el comando
+        shell: bash
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
