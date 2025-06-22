@@ -1,0 +1,67 @@
+name: Deploy Jekyll Chirpy Blog to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Asegúrate que esta sea tu rama principal (es la que usas)
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Job para construir el sitio Jekyll
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Si tu tema tiene submódulos (Chirpy los usa para algunos assets),
+          # inicializa los submódulos de forma recursiva.
+          submodules: true
+          # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
+                           # o problemas con repositorios de submodulos.
+                           # Si da problemas, descomenta esta línea.
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2' # Versión de Ruby compatible con Jekyll 4.x y Chirpy 7.x
+          bundler-cache: true # Caching de las gemas para builds más rápidos
+
+      - name: Install Dependencies
+        # Esto instalará las gemas listadas en tu Gemfile (jekyll-feed, jekyll-seo-tag)
+        # y el entorno base de Jekyll necesario para el remote_theme.
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Build Jekyll Site
+        # JEKYLL_ENV=production optimiza la salida.
+        # remote_theme en _config.yml se encargará de descargar y usar Chirpy.
+        run: JEKYLL_ENV=production bundle exec jekyll build --verbose
+        env:
+          # Estas variables de entorno sobreescriben _config.yml.
+          # SOLO descomenta si necesitas ajustar baseurl o url en el workflow.
+          # JEKYLL_BASEURL: '/Ciber'
+          # JEKYLL_URL: 'https://germa15.github.io'
+
+      - name: Upload artifact for GitHub Pages
+        # Sube la carpeta _site generada por Jekyll para el despliegue.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site # Directorio donde Jekyll construye el sitio
+
+  # Job para desplegar el sitio en GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build # Este job depende del job 'build' para asegurar que el sitio se construya primero
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
