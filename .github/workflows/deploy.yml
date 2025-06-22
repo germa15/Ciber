@@ -14,38 +14,33 @@ permissions:
 jobs:
   # Job para construir el sitio Jekyll
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Considera 'ubuntu-22.04' si persisten los problemas de Ubuntu 24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           submodules: true
           # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
-                            # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
+                        # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          # ¡IMPORTANTE! bundler-cache: true se desactiva aquí para que 'bundle install --path vendor/bundle' funcione sin conflicto.
+          # Mantén esta línea comentada si usas 'bundle install --path vendor/bundle' explícitamente
           # bundler-cache: true
 
-      # Eliminamos el paso 'Install Bundler' si lo tenías separado
-
-      - name: Install Dependencies to Vendor Bundle # <--- ¡NUEVO PASO DE INSTALACIÓN CLAVE!
+      - name: Install Dependencies to Vendor Bundle
         # Instala todas las gemas (incluyendo Jekyll y Chirpy) en la carpeta local 'vendor/bundle'.
         # Esto nos da control directo sobre su ubicación.
         run: bundle install --path vendor/bundle
 
-      # Eliminamos el paso 'Add Bundler to PATH' que habíamos probado antes.
-
       - name: Build Jekyll Site # <--- ¡PASO DE CONSTRUCCIÓN CORREGIDO!
-        # Primero, añade el directorio de binarios de 'vendor/bundle' a la PATH.
-        # Luego, ejecuta Jekyll directamente desde esa PATH.
+        # Usa 'bundle exec' para asegurar que Jekyll se ejecuta en el contexto de Bundler,
+        # lo que resuelve automáticamente los problemas de PATH.
         run: |
-          export PATH=$(pwd)/vendor/bundle/bin:$PATH
-          JEKYLL_ENV=production jekyll build --verbose
-        shell: bash # Asegura que se usa Bash para el comando 'export PATH'
+          JEKYLL_ENV=production bundle exec jekyll build --verbose
+        shell: bash # Asegura que se usa Bash para el comando
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
@@ -57,7 +52,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Considera 'ubuntu-22.04' aquí también
     needs: build # Este job depende del job 'build' para asegurar que el sitio se construya primero
 
     steps:
