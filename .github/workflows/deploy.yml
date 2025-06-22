@@ -20,18 +20,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-          # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
-                        # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
 
       - name: Set up Ruby and Install Dependencies
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true # ¡IMPORTANTE! Activamos la caché de Bundler
+          bundler-cache: true # ¡IMPORTANTE! Asegúrate de que esto esté activo y en minúsculas
 
-      # Elimina o comenta este paso para evitar conflictos
-      # - name: Install Dependencies to Vendor Bundle
-      #   run: bundle install --path vendor/bundle
+      # --- Pasos de depuración ---
+      - name: Debug: Print PATH and current directory
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "PATH: $PATH"
+
+      - name: Debug: List contents of Bundler's gem home
+        run: |
+          # Esto intentará mostrar dónde Bundler instala las gemas y si Jekyll está allí
+          bundle config --local path # Muestra la ruta configurada para las gemas
+          bundle env # Muestra el entorno de Bundler
+          gem env # Muestra el entorno de Gem (RubyGems)
+          bundle exec gem which jekyll || echo "Jekyll not found by bundle exec gem which" # Intenta localizar Jekyll
+          find . -name "jekyll" # Busca el ejecutable jekyll en todo el directorio del repo
+
+      - name: Debug: Check Gemfile.lock integrity
+        run: |
+          # Asegurarse de que el Gemfile.lock no esté roto o haya problemas
+          bundle check || echo "Bundle check failed, dependencies might be missing or mismatched."
+      # --- Fin de Pasos de depuración ---
 
       - name: Build Jekyll Site
         run: |
@@ -49,7 +64,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest # Considera 'ubuntu-22.04' aquí también
-    needs: build # Este job depende del job 'build' para asegurar que el sitio se construya primero
+    needs: build
 
     steps:
       - name: Deploy to GitHub Pages
