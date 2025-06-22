@@ -1,7 +1,5 @@
 ---
 layout: home
-title: Bienvenido a mi Blog de Ciberseguridad
+# Este es el layout por defecto de Chirpy para la página principal.
+# Cualquier contenido Markdown que añadas aquí aparecerá ENCIMA de la lista de posts.
 ---
-
-¡Hola! Este es el contenido inicial de la página principal de mi blog.
-Pronto encontrarás artículos interesantes sobre ciberseguridad y hacking ético.
