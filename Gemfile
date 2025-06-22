@@ -3,6 +3,7 @@ source "https://rubygems.org"
 # Este Gemfile es mínimo para usar con GitHub Actions y remote_theme.
 # GitHub Actions gestiona Jekyll, el tema (Chirpy) y sus dependencias.
 # No necesitas listar 'jekyll', 'minima', 'jekyll-theme-chirpy' o 'github-pages' aquí.
+gem "jekyll", "~> 4.3"
 
 group :jekyll_plugins do
   # Si usas plugins adicionales que NO son parte del tema o de Jekyll por defecto, ponlos aquí.

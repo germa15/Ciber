@@ -9,7 +9,7 @@ twitter_username: kzu1500
 github_username: germa15
 
 # Build settings
-theme: chirpy
+remote_theme: cotes2020/jekyll-theme-chirpy@v7.2.3
 # remote_theme: cotes2020/jekyll-theme-chirpy # Si la anterior sigue dando error de 404 de descarga, prueba esta.
 
 plugins:
