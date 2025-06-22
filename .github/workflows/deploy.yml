@@ -19,7 +19,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # Chirpy usa submódulos para algunos assets, es crucial inicializarlos.
+          # Si tu tema tiene submódulos (Chirpy los usa para algunos assets),
+          # inicializa los submódulos de forma recursiva.
           submodules: true
           # fetch-depth: 0 # Opcional: Puede ser necesario si tienes un historial muy largo
                             # o si los submódulos tienen problemas. Si el workflow falla aquí, descomenta.
@@ -30,11 +31,14 @@ jobs:
           ruby-version: '3.2' # Versión de Ruby compatible con Jekyll 4.x y Chirpy 7.x
           bundler-cache: true # Caching de las gemas para builds más rápidos (instala desde Gemfile.lock o Gemfile)
 
+      - name: Install Dependencies # <--- ¡ESTE PASO FALTABA O NO ESTABA BIEN!
+        # Instala las gemas especificadas en tu Gemfile, incluyendo Jekyll y el tema Chirpy.
+        # `bundler-cache: true` en el paso anterior optimiza esto.
+        run: bundle install
+
       - name: Build Jekyll Site
         # JEKYLL_ENV=production optimiza la salida.
-        # remote_theme en _config.yml se encargará de descargar y usar Chirpy.
-        # Asegúrate que tu _config.yml tenga: remote_theme: cotes2020/jekyll-theme-chirpy@v7.2.3
-        # o solo remote_theme: cotes2020/jekyll-theme-chirpy
+        # Tu _config.yml usa 'theme: jekyll-theme-chirpy', que se instalará como gema.
         run: JEKYLL_ENV=production bundle exec jekyll build --verbose
 
       - name: Upload artifact for GitHub Pages
