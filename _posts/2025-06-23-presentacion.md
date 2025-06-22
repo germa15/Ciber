@@ -14,7 +14,7 @@ Este espacio está dedicado a compartir mi experiencia, conocimientos y herramie
 - 🧰 **Herramientas y scripts**
 - 📚 **Notas y apuntes de estudio**
 
-Este sitio también funciona como un **portafolio público**, donde documento lo que aprendo y aplico. Está pensado tanto para entusiastas como para profesionales de la seguridad informática.
+Este sitio también funciona como un portafolio público, donde documento lo que aprendo y aplico. Está pensado tanto para entusiastas como para profesionales de la seguridad informática.
 
 ---
 
