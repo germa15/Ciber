@@ -227,5 +227,6 @@ jekyll-archives:
     category: /categories/:name/
 
 navigation:
- - title: Inicio
- url: /
+  - title: Inicio
+    url: /
+
