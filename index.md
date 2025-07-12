@@ -47,6 +47,8 @@ tags: [ciberseguridad, hacking ético, portafolio]
 
   <p>Gracias por visitar.</p>
 
+  <br><br>
+
   <!-- Compartir -->
   <div class="post-tail-bottom">
     <div class="share">
