@@ -28,7 +28,6 @@ tags: [ciberseguridad, hacking ético, portafolio]
 
 <div class="page-content">
 
-  <h1>Ciberseguridad desde el fanatismo</h1>
   <p class="autor">by Germa15</p>
 
   <p>Este espacio está dedicado a compartir mi experiencia, conocimientos y herramientas sobre ciberseguridad. Aquí se encuentran artículos propios de temas ciertamente relevantes o mínimamente interesantes:</p>
