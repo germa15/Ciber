@@ -5,7 +5,7 @@ categories: [Presentación]
 tags: [ciberseguridad, hacking ético, portafolio]
 ---
 
-Este espacio está dedicado a compartir mi experiencia, conocimientos y herramientas sobre ciberseguridad. Aquí encontrarás artículos propios de temas ciertamente relevantes o mínimamente interesantes:
+Este espacio está dedicado a compartir mi experiencia, conocimientos y herramientas sobre ciberseguridad. Aquí se encuentran artículos propios de temas ciertamente relevantes o mínimamente interesantes:
 
 - 🔐 **Hacking ético**
 - 🛡️  **Pentesting**
