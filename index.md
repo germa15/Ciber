@@ -1,11 +1,13 @@
 ---
+layout: page
 title: "Ciberseguridad desde el fanatismo"
+permalink: /
 date: 2025-06-23 12:00:00 +0200
 categories: [Presentación]
 tags: [ciberseguridad, hacking ético, portafolio]
 ---
 
-Este espacio está dedicado a compartir mi experiencia, conocimientos y herramientas sobre ciberseguridad. Aquí se encuentran >
+Este espacio está dedicado a compartir mi experiencia, conocimientos y herramientas sobre ciberseguridad. Aquí se encuentran artículos propios de temas ciertamente relevantes o mínimamente interesantes:
 
 - 🔐 **Hacking ético**
 - 🛡  **Pentesting**
@@ -14,7 +16,7 @@ Este espacio está dedicado a compartir mi experiencia, conocimientos y herramie
 - 🧰 **Herramientas y scripts**
 - 📚 **Notas y apuntes de estudio**
 
-Este sitio también funciona como un portafolio público, donde documento lo que aprendo y aplico. Está pensado tanto para entu>
+Este sitio también funciona como un portafolio público, donde documento lo que aprendo y aplico. Está pensado tanto para entusiastas como para profesionales de la seguridad informática.
 
 ---
 
